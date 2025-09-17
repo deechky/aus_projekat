@@ -1,10 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\dcom-radna-verzija",
-    "\\dcom-radna-verzija\\dCom",
-    "\\dcom-radna-verzija\\dCom\\Common"
+    ""
   ],
-  "SelectedNode": "\\dcom-radna-verzija\\dCom\\Common\\Common.csproj",
+  "SelectedNode": "\\dCom.sln",
   "PreviewInSolutionExplorer": false
 }
