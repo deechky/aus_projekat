@@ -58,7 +58,7 @@ namespace ProcessingModule
 		private void Acquisition_DoWork()
 		{
             //TO DO: IMPLEMENT
-            // ovo omogucava grupno citanje svih registara iz rtucfg
+            // ovo omogucava grupno i automatsko citanje svih registara iz rtucfg
             while (!disposed)
             {
                 acquisitionTrigger.WaitOne();
