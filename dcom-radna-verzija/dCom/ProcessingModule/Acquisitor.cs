@@ -14,6 +14,7 @@ namespace ProcessingModule
         private Thread acquisitionWorker;
 		private IStateUpdater stateUpdater;
 		private IConfiguration configuration;
+        private bool disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Acquisitor"/> class.
@@ -57,6 +58,15 @@ namespace ProcessingModule
 		private void Acquisition_DoWork()
 		{
             //TO DO: IMPLEMENT
+            // ovo omogucava grupno citanje svih registara iz rtucfg
+            while (!disposed)
+            {
+                acquisitionTrigger.WaitOne();
+                foreach (var configItem in configuration.GetConfigurationItems())
+                {
+                    this.processingManager.ExecuteReadCommand(configItem, configuration.GetTransactionId(), configuration.UnitAddress, configItem.StartAddress, configItem.NumberOfRegisters);
+                }
+            }
         }
 
         #endregion Private Methods
