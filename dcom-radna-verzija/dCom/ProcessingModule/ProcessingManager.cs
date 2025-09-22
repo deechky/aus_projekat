@@ -109,14 +109,28 @@ namespace ProcessingModule
         private void CommandExecutor_UpdatePointEvent(PointType type, ushort pointAddress, ushort newValue)
         {
             List<IPoint> points = storage.GetPoints(new List<PointIdentifier>(1) { new PointIdentifier(type, pointAddress) });
-            
-            if (type == PointType.ANALOG_INPUT || type == PointType.ANALOG_OUTPUT)
+
+            if (points.Count == 0)
             {
-                ProcessAnalogPoint(points.First() as IAnalogPoint, newValue);
+                return;
             }
-            else
+
+            IPoint point = points.First();
+            point.RawValue = newValue;
+            point.Timestamp = DateTime.Now;
+            // konverzija za EGU i alarmi
+            if (point is IAnalogPoint analogPoint)
             {
-                ProcessDigitalPoint(points.First() as IDigitalPoint, newValue);
+                IConfigItem config = analogPoint.ConfigItem;
+                analogPoint.EguValue = eguConverter.ConvertToEGU(config.ScaleFactor, config.Deviation, newValue);
+                point.Alarm = alarmProcessor.GetAlarmForAnalogPoint(analogPoint.EguValue, config);
+
+            }
+            else if (point is IDigitalPoint digitalPoint)
+            {
+                digitalPoint.State = (DState)newValue;
+                point.Alarm = alarmProcessor.GetAlarmForDigitalPoint(newValue, digitalPoint.ConfigItem);
+
             }
         }
 
