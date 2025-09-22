@@ -15,6 +15,8 @@ namespace ProcessingModule
 		private IProcessingManager processingManager;
 		private int delayBetweenCommands;
         private IConfiguration configuration;
+        private EGUConverter eguConverter = new EGUConverter();
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutomationManager"/> class.
@@ -29,6 +31,7 @@ namespace ProcessingModule
 			this.processingManager = processingManager;
             this.configuration = configuration;
             this.automationTrigger = automationTrigger;
+
         }
 
         /// <summary>
@@ -58,15 +61,77 @@ namespace ProcessingModule
 		}
 
 
-		private void AutomationWorker_DoWork()
-		{
-			//while (!disposedValue)
-			//{
-			//}
-		}
+        private void AutomationWorker_DoWork()
+        {
 
-		#region IDisposable Support
-		private bool disposedValue = false; // To detect redundant calls
+            while (!disposedValue)
+            {
+                automationTrigger.WaitOne();
+                IPoint waterLevelPoint = storage.GetPoints(new List<PointIdentifier> { new PointIdentifier(PointType.ANALOG_OUTPUT, 1000) }).First();
+                IPoint temperaturePoint = storage.GetPoints(new List<PointIdentifier> { new PointIdentifier(PointType.ANALOG_OUTPUT, 1001) }).First();
+                IPoint heaterPoint = storage.GetPoints(new List<PointIdentifier> { new PointIdentifier(PointType.DIGITAL_OUTPUT, 2002) }).First();
+                IPoint valvePoint = storage.GetPoints(new List<PointIdentifier> { new PointIdentifier(PointType.DIGITAL_OUTPUT, 2000) }).First();
+
+                IAnalogPoint waterLevel = waterLevelPoint as IAnalogPoint;
+                IAnalogPoint temperature = temperaturePoint as IAnalogPoint;
+                IDigitalPoint heater = heaterPoint as IDigitalPoint;
+                IDigitalPoint valve = valvePoint as IDigitalPoint;
+
+                // simulacija promjene temperature
+                if (heater.State == DState.ON)
+                {
+                    double heatingConst = 0;
+
+                    if (temperature.EguValue < 30)
+                    {
+                        heatingConst = 2;
+                    }
+                    else if (temperature.EguValue >= 30 && temperature.EguValue <= 50)
+                    {
+                        heatingConst = 5;
+                    }
+                    else
+                    {
+                        heatingConst = 20;
+                    }
+
+                    double newTemp = temperature.EguValue + heatingConst;
+                    processingManager.ExecuteWriteCommand(temperature.ConfigItem, configuration.GetTransactionId(), configuration.UnitAddress, 1001, (int)eguConverter.ConvertToRaw(temperature.ConfigItem.ScaleFactor, temperature.ConfigItem.Deviation, newTemp));
+                }
+
+                // provjera praga pozara i automatska akcija
+                if (temperature.EguValue > 57)
+                {
+                    processingManager.ExecuteWriteCommand(valve.ConfigItem, configuration.GetTransactionId(), configuration.UnitAddress, 2000, (int)DState.ON);
+                }
+
+                if (valve.State == DState.ON)
+                {
+                    double coolingPerSecond = 4.0;
+                    double outflowPerSecond = 10.0;
+
+                    double currentWaterLevel = waterLevel.EguValue;
+                    double currentTemp = temperature.EguValue;
+
+                    if (currentWaterLevel > 0)
+                    {
+                        double waterToUse = Math.Min(currentWaterLevel, outflowPerSecond);
+
+                        double newWaterLevel = currentWaterLevel - waterToUse;
+                        double coolingEffect = (waterToUse / outflowPerSecond) * coolingPerSecond;
+                        double newTemp = currentTemp - coolingEffect;
+
+                        processingManager.ExecuteWriteCommand(waterLevel.ConfigItem, configuration.GetTransactionId(), configuration.UnitAddress, 1000, (int)eguConverter.ConvertToRaw(waterLevel.ConfigItem.ScaleFactor, waterLevel.ConfigItem.Deviation, newWaterLevel));
+                        processingManager.ExecuteWriteCommand(temperature.ConfigItem, configuration.GetTransactionId(), configuration.UnitAddress, 1001, (int)eguConverter.ConvertToRaw(temperature.ConfigItem.ScaleFactor, temperature.ConfigItem.Deviation, newTemp));
+
+                    }
+
+                }
+            }
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
 
 
         /// <summary>

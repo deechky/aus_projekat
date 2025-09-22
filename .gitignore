@@ -1,0 +1,6 @@
+# Visual Studio privremeni fajlovi
+.vs/
+bin/
+obj/
+Debug/
+Release/
