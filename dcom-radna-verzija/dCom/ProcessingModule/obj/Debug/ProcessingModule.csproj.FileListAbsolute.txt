@@ -6,3 +6,5 @@ C:\Users\Racunar1\Desktop\Ognjen\SCADA\dCom\ProcessingModule\bin\Debug\Modbus.dl
 C:\Users\Racunar1\Desktop\Ognjen\SCADA\dCom\ProcessingModule\bin\Debug\Common.pdb
 C:\Users\Racunar1\Desktop\Ognjen\SCADA\dCom\ProcessingModule\obj\Debug\ProcessingModule.dll
 C:\Users\Racunar1\Desktop\Ognjen\SCADA\dCom\ProcessingModule\obj\Debug\ProcessingModule.pdb
+C:\Users\bulic\OneDrive\Desktop\psi\aus_projekat\dcom-radna-verzija\dCom\ProcessingModule\obj\Debug\ProcessingModule.csproj.AssemblyReference.cache
+C:\Users\bulic\OneDrive\Desktop\psi\aus_projekat\dcom-radna-verzija\dCom\ProcessingModule\obj\Debug\ProcessingModule.csproj.CoreCompileInputs.cache
