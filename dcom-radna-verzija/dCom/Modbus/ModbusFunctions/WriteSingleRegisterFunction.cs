@@ -72,7 +72,7 @@ namespace Modbus.ModbusFunctions
             Dictionary<Tuple<PointType, ushort>, ushort> values = new Dictionary<Tuple<PointType, ushort>, ushort>();
             ushort address = BitConverter.ToUInt16(new byte[2] { response[9], response[8] }, 0);
             ushort value = BitConverter.ToUInt16(new byte[2] { response[11], response[10] }, 0);
-            values.Add(new Tuple<PointType, ushort>(PointType.DIGITAL_INPUT, address), value);
+            values.Add(new Tuple<PointType, ushort>(PointType.ANALOG_OUTPUT, address), value);
             return values;
         }
     }
